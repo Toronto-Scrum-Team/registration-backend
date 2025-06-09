@@ -21,6 +21,37 @@ The backend of user-registration build with FastAPI, SQLite, and JWT tokens.
 - **Validation**: Pydantic schemas
 - **Server**: Uvicorn ASGI server
 
+## Prerequisites
+
+Before running this application, ensure you have the following installed on your system:
+
+### System Requirements
+
+- **Python 3.8 or higher** (Tested with Python 3.12.5)
+  - Check your Python version: `python3 --version`
+  - Download from: https://www.python.org/downloads/
+
+- **pip** (Python package installer)
+  - Usually comes with Python installation
+  - Check if installed: `pip --version`
+
+### Optional but Recommended
+
+- **Git** (for version control)
+  - Download from: https://git-scm.com/downloads
+  - Check if installed: `git --version`
+
+- **Virtual Environment Tools**
+  - `venv` (included with Python 3.3+)
+  - Or `virtualenv`: `pip install virtualenv`
+
+### Operating System Support
+
+This application has been tested on:
+- **macOS** (Primary development environment)
+- **Linux** (Ubuntu, CentOS, etc.)
+- **Windows** (with Python 3.8+)
+
 ## Project Structure
 
 ```
@@ -54,16 +85,21 @@ registration_backend/
 
 ## Quick Start
 
+> **Note**: Make sure you have met all the [Prerequisites](#prerequisites) before proceeding.
+
 ### 1. Setup Environment
 
 ```bash
 # Clone or navigate to the project directory
 cd registration_backend
 
-# Activate virtual environment (already created)
-source venv/bin/activate
+# Create virtual environment (if not already created)
+python3 -m venv venv
 
-# Install dependencies (already installed)
+# Activate virtual environment
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
@@ -222,12 +258,14 @@ curl -X GET "http://localhost:8080/auth/me" \
 
 For production deployment:
 
-1. **Change the SECRET_KEY** to a secure random value
-2. **Set DEBUG=False** in environment variables
-3. **Configure proper CORS origins** in `app/main.py`
-4. **Use a production database** (PostgreSQL, MySQL) instead of SQLite
-5. **Set up proper logging** and monitoring
-6. **Use a production ASGI server** like Gunicorn with Uvicorn workers
+1. **Ensure Python 3.8+** is installed on the production server
+2. **Change the SECRET_KEY** to a secure random value
+3. **Set DEBUG=False** in environment variables
+4. **Configure proper CORS origins** in `app/main.py`
+5. **Use a production database** (PostgreSQL, MySQL) instead of SQLite
+6. **Set up proper logging** and monitoring
+7. **Use a production ASGI server** like Gunicorn with Uvicorn workers
+8. **Set up SSL/TLS** for HTTPS in production
 
 ## License
 
