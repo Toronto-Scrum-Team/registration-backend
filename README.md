@@ -1,86 +1,46 @@
 # Registration Backend API
 
-The backend of user-registration build with FastAPI, SQLite, and JWT tokens.
+A secure user authentication backend with FastAPI, JWT tokens, and session management.
 
 ## Features
 
-- **User Registration**: Secure user registration with email and username validation
-- **User Authentication**: JWT token-based authentication system
-- **Password Security**: Bcrypt password hashing
-- **Input Validation**: Comprehensive input validation using Pydantic
-- **API Documentation**: Automatic OpenAPI/Swagger documentation
-- **Database**: SQLite database with SQLAlchemy ORM
-- **CORS Support**: Cross-origin resource sharing enabled
+- User registration and authentication with JWT + session-based system
+- Password security with bcrypt hashing
+- Multi-device session management with automatic cleanup
+- SQLite database with SQLAlchemy ORM (PostgreSQL ready)
+- Comprehensive input validation and security features
 
 ## Technology Stack
 
-- **Framework**: FastAPI
-- **Database**: SQLite with SQLAlchemy ORM
-- **Authentication**: JWT tokens with python-jose
-- **Password Hashing**: bcrypt via passlib
-- **Validation**: Pydantic schemas
-- **Server**: Uvicorn ASGI server
+- **FastAPI** with Uvicorn server
+- **SQLite** with SQLAlchemy ORM
+- **JWT + Session** authentication
+- **bcrypt** password hashing
+- **Pydantic** validation
 
 ## Prerequisites
 
-Before running this application, ensure you have the following installed on your system:
+- **Python 3.8+** and **pip**
+- **Git** (recommended)
+- **Virtual environment** support (venv or virtualenv)
 
-### System Requirements
-
-- **Python 3.8 or higher** (Tested with Python 3.12.5)
-  - Check your Python version: `python3 --version`
-  - Download from: https://www.python.org/downloads/
-
-- **pip** (Python package installer)
-  - Usually comes with Python installation
-  - Check if installed: `pip --version`
-
-### Optional but Recommended
-
-- **Git** (for version control)
-  - Download from: https://git-scm.com/downloads
-  - Check if installed: `git --version`
-
-- **Virtual Environment Tools**
-  - `venv` (included with Python 3.3+)
-  - Or `virtualenv`: `pip install virtualenv`
-
-### Operating System Support
-
-This application has been tested on:
-- **macOS** (Primary development environment)
-- **Linux** (Ubuntu, CentOS, etc.)
-- **Windows** (with Python 3.8+)
+Tested on macOS, Linux, and Windows.
 
 ## Project Structure
 
-```
+```text
 registration_backend/
-├── app/
-│   ├── __init__.py
-│   ├── main.py              # FastAPI application entry point
-│   ├── config.py            # Configuration settings
-│   ├── database.py          # Database connection and setup
-│   ├── models/
-│   │   ├── __init__.py
-│   │   └── user.py          # User SQLAlchemy model
-│   ├── schemas/
-│   │   ├── __init__.py
-│   │   └── user.py          # Pydantic schemas for validation
-│   ├── routes/
-│   │   ├── __init__.py
-│   │   └── auth.py          # Authentication routes
-│   └── utils/
-│       ├── __init__.py
-│       ├── auth.py          # JWT and password utilities
-│       └── dependencies.py  # FastAPI dependencies
-├── venv/                    # Virtual environment
-├── requirements.txt         # Python dependencies
-├── .env                     # Environment variables
-├── .env.template           # Environment template
-├── .gitignore              # Git ignore rules
-├── run.py                  # Application runner
-└── README.md               # This file
+├── app/                     # Main application code
+│   ├── main.py             # FastAPI entry point
+│   ├── models/             # Database models (User, Session)
+│   ├── routes/             # API endpoints (auth, session)
+│   ├── schemas/            # Pydantic validation schemas
+│   └── utils/              # Authentication & session utilities
+├── frontend_session_integration/  # Frontend integration files
+├── requirements.txt        # Dependencies
+├── .env.template          # Environment configuration template
+├── run.py                 # Application runner
+└── README.md              # This file
 ```
 
 ## Quick Start
@@ -112,9 +72,12 @@ cp .env.template .env
 ```
 
 Edit `.env` file with your configuration:
+
 - `SECRET_KEY`: Change to a secure random key for production
 - `DATABASE_URL`: SQLite database path (default: `sqlite:///./registration.db`)
-- `ACCESS_TOKEN_EXPIRE_MINUTES`: JWT token expiration time
+- `ACCESS_TOKEN_EXPIRE_MINUTES`: JWT token expiration time (default: 30 minutes)
+- `SESSION_EXPIRE_HOURS`: Session expiration time (default: 168 hours / 7 days)
+- `SESSION_CLEANUP_INTERVAL_HOURS`: Automatic cleanup interval (default: 24 hours)
 
 ### 3. Run the Application
 
@@ -130,143 +93,63 @@ The application will start on `http://localhost:8080`
 
 ### 4. Access API Documentation
 
-- **Swagger UI**: http://localhost:8080/docs
-- **ReDoc**: http://localhost:8080/redoc
+Visit `http://localhost:8080/docs` for interactive API documentation with all endpoints and schemas.
 
-## API Endpoints
+## API Overview
 
-### Authentication Endpoints
+The API provides the following main endpoints:
 
-#### POST /auth/register
-Register a new user.
+- **Authentication**: `/auth/register`, `/auth/login`, `/auth/logout`, `/auth/me`
+- **Session Management**: `/sessions/`, `/sessions/terminate`, `/sessions/terminate-all`
+- **Utility**: `/`, `/health`
 
-**Request Body:**
-```json
-{
-  "username": "johndoe",
-  "email": "john@example.com",
-  "password": "securepassword123"
-}
-```
-
-**Response (201 Created):**
-```json
-{
-  "id": 1,
-  "username": "johndoe",
-  "email": "john@example.com",
-  "created_at": "2024-01-01T12:00:00Z"
-}
-```
-
-#### POST /auth/login
-Authenticate user and get access token.
-
-**Request Body:**
-```json
-{
-  "username": "johndoe",
-  "password": "securepassword123"
-}
-```
-
-**Response (200 OK):**
-```json
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "token_type": "bearer"
-}
-```
-
-#### GET /auth/me
-Get current authenticated user information (requires authentication).
-
-**Headers:**
-```
-Authorization: Bearer <access_token>
-```
-
-**Response (200 OK):**
-```json
-{
-  "id": 1,
-  "username": "johndoe",
-  "email": "john@example.com",
-  "created_at": "2024-01-01T12:00:00Z"
-}
-```
-
-### Utility Endpoints
-
-#### GET /
-Root endpoint with API information.
-
-#### GET /health
-Health check endpoint.
+For detailed request/response schemas and testing, use the interactive documentation at `/docs`.
 
 ## Testing the API
 
-### Using curl
+The easiest way to test the API is through the interactive documentation at `http://localhost:8080/docs`.
 
-1. **Register a new user:**
-```bash
-curl -X POST "http://localhost:8080/auth/register" \
-     -H "Content-Type: application/json" \
-     -d '{
-       "username": "testuser",
-       "email": "test@example.com",
-       "password": "testpassword123"
-     }'
-```
-
-2. **Login:**
-```bash
-curl -X POST "http://localhost:8080/auth/login" \
-     -H "Content-Type: application/json" \
-     -d '{
-       "username": "testuser",
-       "password": "testpassword123"
-     }'
-```
-
-3. **Get user info (replace TOKEN with actual token):**
-```bash
-curl -X GET "http://localhost:8080/auth/me" \
-     -H "Authorization: Bearer TOKEN"
-```
+You can also use curl or any HTTP client. Basic workflow:
+1. Register a user at `/auth/register`
+2. Login at `/auth/login` to get a JWT token
+3. Use the token in the `Authorization: Bearer <token>` header for protected endpoints
+4. Manage sessions through `/sessions/` endpoints
 
 ## Security Features
 
-- **Password Hashing**: All passwords are hashed using bcrypt
-- **JWT Tokens**: Secure token-based authentication
-- **Input Validation**: Comprehensive validation of all inputs
-- **SQL Injection Protection**: SQLAlchemy ORM prevents SQL injection
-- **CORS Configuration**: Configurable cross-origin resource sharing
+- **Password Security**: bcrypt hashing with strength requirements
+- **JWT + Session Authentication**: Hybrid authentication system
+- **UUID Identifiers**: Secure, unpredictable IDs for all records
+- **Input Validation**: Comprehensive Pydantic validation
+- **Session Management**: Multi-device support with automatic cleanup
+- **SQL Injection Protection**: SQLAlchemy ORM security
 
-## Environment Variables
+## Configuration
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `DATABASE_URL` | Database connection string | `sqlite:///./registration.db` |
-| `SECRET_KEY` | JWT signing secret key | Generated key |
-| `ALGORITHM` | JWT algorithm | `HS256` |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | Token expiration time | `30` |
-| `APP_NAME` | Application name | `Registration Backend` |
-| `DEBUG` | Debug mode | `True` |
+Key environment variables (see `.env.template`):
+
+- `SECRET_KEY`: JWT signing key (change for production)
+- `DATABASE_URL`: Database connection string
+- `ACCESS_TOKEN_EXPIRE_MINUTES`: JWT token lifetime (default: 30)
+- `SESSION_EXPIRE_HOURS`: Session lifetime (default: 168 hours/7 days)
+- `SESSION_CLEANUP_INTERVAL_HOURS`: Cleanup frequency (default: 24)
+
+## Frontend Integration
+
+The `frontend_session_integration/` folder contains React/Next.js integration files with session management UI components.
+
+To integrate:
+1. Copy files from `frontend_session_integration/src/` to your frontend project
+2. Install dependencies and start development
+3. See `frontend_session_integration/INTEGRATION_GUIDE.md` for details
 
 ## Production Deployment
 
-For production deployment:
+For production:
+- Change `SECRET_KEY` to a secure random value
+- Set `DEBUG=False`
+- Use PostgreSQL/MySQL instead of SQLite
+- Configure proper CORS origins
+- Use Gunicorn with Uvicorn workers
+- Set up SSL/TLS for HTTPS
 
-1. **Ensure Python 3.8+** is installed on the production server
-2. **Change the SECRET_KEY** to a secure random value
-3. **Set DEBUG=False** in environment variables
-4. **Configure proper CORS origins** in `app/main.py`
-5. **Use a production database** (PostgreSQL, MySQL) instead of SQLite
-6. **Set up proper logging** and monitoring
-7. **Use a production ASGI server** like Gunicorn with Uvicorn workers
-8. **Set up SSL/TLS** for HTTPS in production
-
-## License
-
-This project is open source and available under the MIT License.

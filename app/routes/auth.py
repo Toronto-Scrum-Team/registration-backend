@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models.user import User
 from ..schemas.user import UserCreate, UserLogin, UserResponse, Token, LogoutResponse
-from ..utils.auth import get_password_hash, verify_password, create_access_token
+from ..utils.auth import get_password_hash, verify_password, create_access_token, create_access_token_with_session
 from ..utils.dependencies import get_current_user
+from ..utils.session import create_session, extract_device_info, terminate_all_user_sessions
 import re
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -73,8 +74,8 @@ def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
     return convert_user_to_response(db_user)
 
 @router.post("/login", response_model=Token)
-def login_user(user_credentials: UserLogin, db: Session = Depends(get_db)):
-    """Authenticate user and return access token."""
+def login_user(user_credentials: UserLogin, request: Request, db: Session = Depends(get_db)):
+    """Authenticate user and return access token with session."""
 
     # Find user by email
     user = db.query(User).filter(User.email == user_credentials.email).first()
@@ -87,8 +88,20 @@ def login_user(user_credentials: UserLogin, db: Session = Depends(get_db)):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Create access token using email as subject
-    access_token = create_access_token(data={"sub": user.email})
+    # Extract device information
+    user_agent = request.headers.get("user-agent")
+    # Get client IP (considering proxy headers)
+    client_ip = request.headers.get("x-forwarded-for", request.client.host if request.client else None)
+    device_info = extract_device_info(user_agent, client_ip)
+
+    # Create session
+    session = create_session(db, user, device_info)
+
+    # Create access token with session information
+    access_token = create_access_token_with_session(
+        data={"sub": user.email},
+        session_id=str(session.session_id)
+    )
 
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -98,14 +111,17 @@ def get_current_user_info(current_user: User = Depends(get_current_user)):
     return convert_user_to_response(current_user)
 
 @router.post("/logout", response_model=LogoutResponse)
-def logout_user(current_user: User = Depends(get_current_user)):
-    """Logout the current authenticated user.
+def logout_user(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Logout the current authenticated user and terminate all sessions.
 
-    This endpoint validates the JWT token and returns a success response.
-    The actual token removal is handled by the client.
+    This endpoint validates the JWT token, terminates all user sessions,
+    and returns a success response.
     """
+    # Terminate all sessions for the user
+    terminated_count = terminate_all_user_sessions(db, str(current_user.id))
+
     return LogoutResponse(
-        message=f"User {current_user.email} logged out successfully",
+        message=f"User {current_user.email} logged out successfully. {terminated_count} sessions terminated.",
         success=True
     )
 
