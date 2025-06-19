@@ -7,7 +7,8 @@ import uuid
 from ..database import Base
 
 class GUID(TypeDecorator):
-    """A custom GUID type for cross database compatibility.
+    """A custom GUID type for cross database compatibility,
+    make it easy to switch between databases if needed, the scale target is PostgreSQL rightnow.
     Uses PostgreSQL's UUID(native) type, otherwise uses CHAR(36) in SQLite, 
     storing as stringified hex values.
     """

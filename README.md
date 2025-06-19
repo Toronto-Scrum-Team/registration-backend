@@ -22,7 +22,6 @@ A secure user authentication backend with FastAPI, JWT tokens, and session manag
 
 - **Python 3.8+** and **pip**
 - **Git** (recommended)
-- **Virtual environment** support (venv or virtualenv)
 
 Tested on macOS, Linux, and Windows.
 
