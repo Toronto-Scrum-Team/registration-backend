@@ -56,3 +56,7 @@ def test_login_user_success(mock_user_data, mocker):
 
     assert response.status_code == 200
     assert response.json()["access_token"] == "mocked.jwt.token"
+
+
+if __name__ == "__main__":
+    pytest.main()
