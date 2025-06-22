@@ -30,7 +30,7 @@ Tested on macOS, Linux, and Windows.
 ```text
 registration_backend/
 ├── .github/                # Github CI pipeline
-│   └── workflows           # Github actions workflows default folder
+│   └── workflows/          # Github actions workflows default folder
 │       └── ci.yml          # CI script
 ├── app/                    # Main application code
 │   ├── main.py             # FastAPI entry point
