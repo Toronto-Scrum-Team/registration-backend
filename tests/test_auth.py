@@ -15,7 +15,7 @@ client = TestClient(app)
 @pytest.fixture
 def user_input_data():
     return {
-        "email": "test2@example.com",
+        "email": "test3@example.com",
         "firstName": "Test",
         "lastName": "User",
         "password": "StrongPass!2",
@@ -54,7 +54,7 @@ def test_register_user_success(
 
 
 def test_login_user_success(monkeypatch: pytest.MonkeyPatch):
-    credentials = {"email": "test@example.com", "password": "StrongPass!2"}
+    credentials = {"email": "test3@example.com", "password": "StrongPass!2"}
 
     # Mock DB
     mock_db = MagicMock()
