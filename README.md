@@ -29,12 +29,16 @@ Tested on macOS, Linux, and Windows.
 
 ```text
 registration_backend/
-├── app/                     # Main application code
+├── .github/                # Github CI pipeline
+│   └── workflows           # Github actions workflows default folder
+│       └── ci.yml          # CI script
+├── app/                    # Main application code
 │   ├── main.py             # FastAPI entry point
 │   ├── models/             # Database models (User, Session)
 │   ├── routes/             # API endpoints (auth, session)
 │   ├── schemas/            # Pydantic validation schemas
 │   └── utils/              # Authentication & session utilities
+├── tests/                  # Testcases
 ├── frontend_session_integration/  # Frontend integration files
 ├── requirements.txt        # Dependencies
 ├── .env.template          # Environment configuration template
