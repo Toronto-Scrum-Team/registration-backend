@@ -15,7 +15,7 @@ client = TestClient(app)
 @pytest.fixture
 def user_input_data():
     return {
-        "email": "test1@example.com",
+        "email": "test2@example.com",
         "firstName": "Test",
         "lastName": "User",
         "password": "StrongPass!2",
