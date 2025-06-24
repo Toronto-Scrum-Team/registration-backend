@@ -59,13 +59,24 @@ def test_register_passwords_do_not_match(user_input_data):
     assert "passwords" in response.text.lower()
 
 
-def test_register_weak_password(user_input_data):
+def test_register_short_weak_password(user_input_data):
+    """Handled by Pydantic (schema definition)"""
     user_data = user_input_data.copy()
     user_data["password"] = "weak"
     user_data["confirmPassword"] = "weak"
 
     response = client.post("/auth/register", json=user_data)
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert "password" in response.text.lower()
+
+
+def test_register_long_weak_password(user_input_data):
+    user_data = user_input_data.copy()
+    user_data["password"] = "weakpass"
+    user_data["confirmPassword"] = "weakpass"
+
+    response = client.post("/auth/register", json=user_data)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "password" in response.text.lower()
 
 
